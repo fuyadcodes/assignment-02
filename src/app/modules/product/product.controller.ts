@@ -1,7 +1,20 @@
 import { Request, Response } from 'express'
 import { ProductServices } from './product.service'
+import { productJoiSchema } from './product.validation'
 
 const createProduct = async (req: Request, res: Response) => {
+    const { error } = productJoiSchema.validate(req.body.product, {
+        abortEarly: false,
+    })
+
+    if (error) {
+        return res.status(400).json({
+            success: false,
+            message: 'Validation error',
+            errors: error.details.map((detail) => detail.message),
+        })
+    }
+
     try {
         const { product } = req.body
         const result = await ProductServices.createProductIntoDB(product)
@@ -58,6 +71,18 @@ const getAProduct = async (req: Request, res: Response) => {
 }
 
 const updateAProduct = async (req: Request, res: Response) => {
+    const { error } = productJoiSchema.validate(req.body.product, {
+        abortEarly: false,
+    })
+
+    if (error) {
+        return res.status(400).json({
+            success: false,
+            message: 'Validation error',
+            errors: error.details.map((detail) => detail.message),
+        })
+    }
+
     try {
         const { productId } = req.params
         const productData = req.body.product
@@ -100,7 +125,6 @@ const deleteAProduct = async (req: Request, res: Response) => {
         })
     }
 }
-
 
 export const ProductController = {
     createProduct,
